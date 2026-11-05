@@ -25,8 +25,8 @@ static void drawCheckFrame(uint16_t frame, uint8_t face)
   const unsigned offset = (face % 4) * BOOT_FACE_WIDTH * BOOT_FACE_HEIGHT;
   for (unsigned y = 0; y < BOOT_FACE_HEIGHT; ++y) {
     for (unsigned x = 0; x < BOOT_FACE_WIDTH; ++x) {
-      const uint8_t alpha = bootFaceAlpha[offset + y * BOOT_FACE_WIDTH + x];
-      if (alpha) spr.drawPixel(135 + x, 85 + y, whiteWithAlpha(alpha));
+      const uint16_t color = bootFacePixels[offset + y * BOOT_FACE_WIDTH + x];
+      if (color) spr.drawPixel(129 + x, 85 + y, color);
     }
   }
   spr.setTextDatum(MC_DATUM);

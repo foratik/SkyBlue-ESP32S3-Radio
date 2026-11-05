@@ -1,0 +1,25 @@
+{
+  "version": "refigh-v1.1.1",
+  "date": "2026-11-05",
+  "face_only": true,
+  "head_outline_width": 52,
+  "previous_head_outline_width": 38,
+  "face_sprite": [
+    62,
+    44
+  ],
+  "colors": [
+    "soft white",
+    "mint",
+    "subtle blush",
+    "dark blue background"
+  ],
+  "animation_frames": 44,
+  "animation_ms": 1795,
+  "embedded_boot_asset_bytes": 57860,
+  "application_bytes": 774560,
+  "calligraphy_assets_unchanged": true,
+  "hardware_screenshot_verified": true,
+  "radio_resumed": true,
+  "record_type": "Non-identifying validation summary; raw device logs omitted"
+}
