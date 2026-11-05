@@ -50,54 +50,78 @@ void refighPrintStatus()
 {
   const char *estimate = lastAntenna == RefighAntenna::LikelyPresent ? "likely-present" :
                          lastAntenna == RefighAntenna::LikelyAbsent ? "likely-absent" : "unknown";
-  Serial.printf("Refigh: enabled=%u antenna=%s samples=%u stations=%u RSSI=%u SNR=%u method=%s distance-present=%.2f distance-absent=%.2f\n",
+  char message[256];
+  const int length = snprintf(message, sizeof(message), "Refigh: enabled=%u antenna=%s samples=%u stations=%u RSSI=%u SNR=%u method=%s distance-present=%.2f distance-absent=%.2f\n",
                 refighEnabled, estimate, validSamples, stableStations, bestRssi, bestSnr,
                 usedSignature ? "signature" : "stations", presentDistance, absentDistance);
+  if (length > 0 && length < (int)sizeof(message) && Serial.availableForWrite() >= length)
+    Serial.write((const uint8_t *)message, length);
 }
 
 static bool outputJpeg(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t *pixels)
 {
-  if (x < 0 || y < 0 || x + w > tft.width() || y + h > tft.height()) return false;
-  tft.pushImage(x, y, w, h, pixels);
+  if (x < 0 || y < 0 || x + w > spr.width() || y + h > spr.height()) return false;
+  spr.pushImage(x, y, w, h, pixels);
   return true;
 }
 
 void refighPlay()
 {
-  // No rotation change: video left, properly shaped Persian text right.
-  const bool oldSwap = tft.getSwapBytes();
+  // Compose text AND frame zero off-screen. No USB writes may sit between
+  // presenting the composite and starting playback: CDC backpressure can wait 2s.
+  const uint32_t preparing = millis();
+  const bool oldSpriteSwap = spr.getSwapBytes();
   const bool oldDecoderSwap = TJpgDec._swap;
-  tft.setSwapBytes(false);
+  const auto oldCallback = TJpgDec.tft_output;
+  const auto restoreDecoder = [&]() {
+    spr.setSwapBytes(oldSpriteSwap);
+    TJpgDec.setSwapBytes(oldDecoderSwap);
+    TJpgDec.setCallback(oldCallback);
+  };
+  spr.setSwapBytes(false);
   TJpgDec.setSwapBytes(true);
   TJpgDec.setJpgScale(1);
   TJpgDec.setCallback(outputJpeg);
-  tft.fillScreen(TFT_BLACK);
+  spr.fillSprite(TFT_BLACK);
   if (TJpgDec.drawJpg(96, 0, refighPanel, sizeof(refighPanel)) != JDR_OK) {
     Serial.println("Refigh: text panel decode failed");
-    tft.setSwapBytes(oldSwap);
-    TJpgDec.setSwapBytes(oldDecoderSwap);
+    restoreDecoder();
     return;
   }
-  Serial.printf("Refigh: playing %u silent frames\n", REFIGH_FRAME_COUNT);
+  const RefighFrame &first = refighFrames[0];
+  if (TJpgDec.drawJpg(0, 0, refighVideo + first.offset, first.length) != JDR_OK) {
+    restoreDecoder();
+    Serial.println("Refigh: first frame decode failed");
+    return;
+  }
+  const uint32_t preparedMs = millis() - preparing;
+  spr.pushSprite(0, 0);
   const uint32_t started = millis();
-  unsigned played = 0;
+  unsigned played = 1;
+  uint32_t previousFrame = 0;
+  bool decodeFailed = false;
   while (true) {
     const uint32_t frame = (millis() - started) / REFIGH_FRAME_MS;
     if (frame >= REFIGH_FRAME_COUNT) break;
+    if (digitalRead(ENCODER_PUSH_BUTTON) == LOW) break;
+    if (frame == previousFrame) { delay(1); continue; }
     const RefighFrame &entry = refighFrames[frame];
     if (TJpgDec.drawJpg(0, 0, refighVideo + entry.offset, entry.length) != JDR_OK) {
-      Serial.printf("Refigh: video decode failed at frame %lu\n", (unsigned long)frame);
+      decodeFailed = true;
       break;
     }
+    spr.pushSprite(0, 0, 0, 0, 96, 170);
+    previousFrame = frame;
     ++played;
-    // Skip with the physical encoder button; never alter tuning/settings.
-    if (digitalRead(ENCODER_PUSH_BUTTON) == LOW) break;
-    while ((uint32_t)(millis() - started) < (frame + 1) * REFIGH_FRAME_MS) delay(1);
   }
-  Serial.printf("Refigh: playback finished frames=%u elapsed=%lu ms\n", played,
-                (unsigned long)(millis() - started));
-  tft.setSwapBytes(oldSwap);
-  TJpgDec.setSwapBytes(oldDecoderSwap);
+  const uint32_t elapsed = millis() - started;
+  restoreDecoder();
+  // Keep diagnostics outside the timed/visible playback path.
+  char message[192];
+  const int length = snprintf(message, sizeof(message), "Refigh: playback finished frames=%u elapsed=%lu ms prepare=%lu ms first-frame=paired error=%u\n",
+                played, (unsigned long)elapsed, (unsigned long)preparedMs, decodeFailed);
+  if (length > 0 && length < (int)sizeof(message) && Serial.availableForWrite() >= length)
+    Serial.write((const uint8_t *)message, length);
 }
 
 static RefighAntenna estimateAntenna()

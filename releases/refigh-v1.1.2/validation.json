@@ -1,0 +1,24 @@
+{
+  "version": "refigh-v1.1.2",
+  "date": "2026-11-05",
+  "host_reader_paused_during_repeat": true,
+  "radio_resumed": true,
+  "application_bytes": 776480,
+  "record_type": "Non-identifying validation summary; raw device logs omitted",
+  "playback_tests": [
+    {
+      "test": "startup",
+      "frames": 75,
+      "elapsed_ms": 7500,
+      "prepare_ms": 51,
+      "first_frame_paired": true
+    },
+    {
+      "test": "repeat",
+      "frames": 75,
+      "elapsed_ms": 7500,
+      "prepare_ms": 50,
+      "first_frame_paired": true
+    }
+  ]
+}
