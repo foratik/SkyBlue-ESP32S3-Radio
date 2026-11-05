@@ -2,6 +2,7 @@
 #include "Themes.h"
 #include "Menu.h"
 #include "Refigh.h"
+#include "BootScreen.h"
 
 #ifndef DISABLE_REMOTE
 
@@ -110,6 +111,10 @@ int remoteDoCommand(char key)
 
   switch(key)
   {
+    case 'J':
+      refighShowCheckIntro();
+      remoteCaptureScreen();
+      return REMOTE_CHANGED;
     case 'F':
       refighSetEnabled(!refighEnabled);
       return REMOTE_CHANGED;

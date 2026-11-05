@@ -1,0 +1,16 @@
+{
+  "date": "2026-11-05",
+  "display": [
+    320,
+    170
+  ],
+  "animation_frames": 44,
+  "animation_ms": 1795,
+  "embedded_boot_asset_bytes": 44836,
+  "application_bytes": 761552,
+  "hardware_screenshot_verified": true,
+  "radio_resumed": true,
+  "antenna_algorithm_unchanged": true,
+  "version": "refigh-v1.1.0",
+  "record_type": "Non-identifying validation summary; raw device logs omitted"
+}

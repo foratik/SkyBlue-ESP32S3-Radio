@@ -3,6 +3,7 @@
 #include "RefighDecision.h"
 #include "RefighSignature.h"
 #include "RefighAssets.h"
+#include "BootScreen.h"
 #include <Preferences.h>
 #include <TJpg_Decoder.h>
 #include <Wire.h>
@@ -108,11 +109,7 @@ static RefighAntenna estimateAntenna()
   usedSignature = false;
   presentDistance = absentDistance = 0;
   bestRssi = bestSnr = 0;
-  tft.fillScreen(TFT_BLACK);
-  tft.setTextDatum(MC_DATUM);
-  tft.setTextColor(TFT_WHITE, TFT_BLACK);
-  tft.drawString("Refigh", 160, 53, 4);
-  tft.drawString("Checking antenna...", 160, 88, 2);
+  if (!refighShowCheckIntro()) return RefighAntenna::Unknown;
   bool radioPresent = false;
   for (uint8_t address : {uint8_t(0x11), uint8_t(0x63)}) {
     Wire.beginTransmission(address);
@@ -158,7 +155,7 @@ static RefighAntenna estimateAntenna()
     if (refighDecision(validSamples, stableStations, bestRssi, bestSnr) == RefighAntenna::LikelyPresent)
       return RefighAntenna::LikelyPresent;
     const unsigned width = (frequency - 8750) * 260UL / (10800 - 8750);
-    tft.fillRect(30, 120, width, 3, TFT_ORANGE);
+    tft.fillRect(30, 162, width, 3, TFT_ORANGE);
     delay(1);
   }
   if (!validSamples) return RefighAntenna::Unknown;
