@@ -1,0 +1,10 @@
+{
+  "date": "2026-11-05",
+  "antenna_connected_test": "passed: video skipped",
+  "antenna_disconnected_test": "passed: 75 frames, 7500 ms",
+  "off_persistence_test": "passed",
+  "host_decision_tests": "passed",
+  "application_bytes": 716064,
+  "version": "refigh-v1.0.0",
+  "record_type": "Non-identifying validation summary; raw device logs omitted"
+}

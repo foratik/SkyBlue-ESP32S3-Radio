@@ -1,6 +1,7 @@
 #include "Common.h"
 #include "Themes.h"
 #include "Menu.h"
+#include "Refigh.h"
 
 //
 // Bands Menu
@@ -20,7 +21,7 @@ int bandIdx = 0;
 // Band limits are expanded to align with the nearest tuning scale mark
 Band bands[] =
 {
-  {"VHF",  FM_BAND_TYPE, FM,   6400, 10800, 10390, 2, 0, 0},
+  {"FM",  FM_BAND_TYPE, FM,   6400, 10800, 10390, 2, 0, 0},
   // All band. LW, MW and SW (from 150kHz to 30MHz)
   {"ALL",  SW_BAND_TYPE, AM,    150, 30000, 15000, 1, 4, 0},
   {"11M",  SW_BAND_TYPE, AM,  25600, 26100, 25850, 1, 4, 0},
@@ -103,7 +104,8 @@ static const char *menu[] =
 #define MENU_RDS          3
 #define MENU_SLEEP        4
 #define MENU_SLEEPMODE    5
-#define MENU_ABOUT        6
+#define MENU_REFIGH       6
+#define MENU_ABOUT        7
 
 int8_t settingsIdx = MENU_BRIGHTNESS;
 
@@ -115,6 +117,7 @@ static const char *settings[] =
   "RDS",
   "Sleep",
   "Sleep Mode",
+  "Refigh",
   "About",
 };
 
@@ -618,6 +621,7 @@ static void clickSettings(int cmd)
     case MENU_RDS:        currentCmd = CMD_RDS;       break;
     case MENU_SLEEP:      currentCmd = CMD_SLEEP;     break;
     case MENU_SLEEPMODE:  currentCmd = CMD_SLEEPMODE; break;
+    case MENU_REFIGH:     currentCmd = CMD_REFIGH;    break;
     case MENU_ABOUT:      currentCmd = CMD_ABOUT;     break;
   }
 }
@@ -646,6 +650,7 @@ bool doSideBar(uint16_t cmd, int dir)
     case CMD_MEMORY:    doMemory(dir);break;
     case CMD_SLEEP:     doSleep(dir);break;
     case CMD_SLEEPMODE: doSleepMode(dir);break;
+    case CMD_REFIGH:    refighSetEnabled(dir > 0);break;
     case CMD_ABOUT:     return(true);
     default:            return(false);
   }
@@ -1015,6 +1020,15 @@ static void drawSleep(int x, int y, int sx)
   spr.drawNumber(currentSleep, 40+x+(sx/2), 60+y, 4);
 }
 
+static void drawRefigh(int x, int y, int sx)
+{
+  drawCommon("Refigh", x, y, sx);
+  spr.fillRect(6+x, 25+y, 66+sx, 78, TH.menu_bg);
+  spr.setTextColor(TH.menu_param, TH.menu_bg);
+  spr.drawString(refighEnabled ? "On" : "Off", 40+x+(sx/2), 52+y, 4);
+  spr.drawString("Boot check", 40+x+(sx/2), 82+y, 2);
+}
+
 static void drawInfo(int x, int y, int sx)
 {
   char text[16];
@@ -1113,6 +1127,7 @@ void drawSideBar(uint16_t cmd, int x, int y, int sx)
     case CMD_MEMORY:    drawMemory(x, y, sx);    break;
     case CMD_SLEEP:     drawSleep(x, y, sx);     break;
     case CMD_SLEEPMODE: drawSleepMode(x, y, sx); break;
+    case CMD_REFIGH:    drawRefigh(x, y, sx);    break;
     default:            drawInfo(x, y, sx);      break;
   }
 }

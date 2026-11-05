@@ -28,7 +28,8 @@
 #define CMD_RDS       0x0F00 // |
 #define CMD_SLEEP     0x1000 // |
 #define CMD_SLEEPMODE 0x1100 // |
-#define CMD_ABOUT     0x1200 //-SETTINGS MODE ends here
+#define CMD_REFIGH    0x1200
+#define CMD_ABOUT     0x1300 //-SETTINGS MODE ends here
 
 #define SLEEP_LOCKED   0 // Lock the encoder
 #define SLEEP_UNLOCKED 1 // Do not lock the encoder

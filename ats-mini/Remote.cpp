@@ -1,6 +1,7 @@
 #include "Common.h"
 #include "Themes.h"
 #include "Menu.h"
+#include "Refigh.h"
 
 #ifndef DISABLE_REMOTE
 
@@ -109,6 +110,24 @@ int remoteDoCommand(char key)
 
   switch(key)
   {
+    case 'F':
+      refighSetEnabled(!refighEnabled);
+      return REMOTE_CHANGED;
+    case 'P':
+    {
+      const uint8_t previousVolume = volume;
+      rx.setAudioMute(true);
+      refighPlay();
+      rx.setAudioMute(false);
+      rx.setVolume(previousVolume);
+      return REMOTE_CHANGED;
+    }
+    case '?':
+      refighPrintStatus();
+      return 0;
+    case 'D':
+      refighPrintSamples();
+      return 0;
     case 'R': // Rotate Encoder Clockwise
       event |= 1 << REMOTE_DIRECTION;
       break;

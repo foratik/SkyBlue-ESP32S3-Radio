@@ -5,6 +5,7 @@
 #include "Common.h"
 #include <Wire.h>
 #include "EEPROM.h"
+#include "Refigh.h"
 #include "Rotary.h"              // Disabled half-step mode
 #include "Button.h"
 #include "Menu.h"
@@ -183,7 +184,7 @@ void setup()
 
   // Audio Amplifier Enable. G8PTN: Added
   // After the SI4732 has been setup, enable the audio amplifier
-  digitalWrite(PIN_AMP_EN, HIGH);
+  // Amplifier stays disabled through the Refigh check and silent video.
 
   // If EEPROM contents are ok...
   if(eepromVerify())
@@ -197,12 +198,17 @@ void setup()
     eepromSaveConfig();
   }
 
+  refighLoad();
+  refighBoot();
+
   // ** SI4732 STARTUP **
   // Uses values from EEPROM (Last stored or defaults after EEPROM reset)
   ledcWrite(PIN_LCD_BL, currentBrt);
   selectBand(bandIdx, false);
   delay(50);
+  rx.setAudioMute(false);
   rx.setVolume(volume);
+  digitalWrite(PIN_AMP_EN, HIGH);
 
   // Draw display for the first time
   drawScreen();

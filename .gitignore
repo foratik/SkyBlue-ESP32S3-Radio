@@ -1,0 +1,11 @@
+/build/
+/assets/
+/preview/
+/venv/
+/.venv/
+/build.log
+/test-decision
+__pycache__/
+*.pyc
+*.bundle
+.DS_Store
